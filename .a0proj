@@ -1,0 +1,16 @@
+{
+  "project_name": "Tennis Simulation Suite",
+  "version": "1.0.0-dev",
+  "description": "Comprehensive tennis match simulation and analysis platform",
+  "stage": "repo-ready",
+  "git_remote": "https://github.com/dusty-schmidt/tennis-sim.git",
+  "primary_languages": ["Python"],
+  "features": [
+    "Match simulation engine",
+    "Player performance analysis",
+    "Statistical modeling",
+    "Tournament simulation"
+  ],
+  "automation_enabled": true,
+  "managed_by": "Agent Zero"
+}

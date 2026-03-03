@@ -78,3 +78,5 @@ git checkout dev && git pull origin dev
 | Check current state | `git lg` |
 | Merge completed branch | `git merge --no-ff feature/name` |
 | New release | tag on main |
+
+- Verified push connectivity by Agent Zero

@@ -7,3 +7,4 @@ rapidfuzz==3.14.3
 Requests==2.32.5
 streamlit==1.54.0
 lxml==6.0.2
+plotly==6.0.0

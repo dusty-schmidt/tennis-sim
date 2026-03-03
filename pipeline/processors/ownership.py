@@ -1,54 +1,54 @@
 
-# --- Advanced Ownership Simulation Module ---
+# --- Builder Simulation Module (Uniques) ---
 import numpy as np
 import pandas as pd
 import random
 
-def build_lineup_with_uniques(players_df, existing_lineups, min_uniques=3, salary_cap=50000, roster_size=6):
+def simulate_market_ownership(projections_df, n_lineups=250, min_uniques=3, randomness=0.3):
 	"""
-	Attempts to build a single lineup that has at least min_uniques difference from existing ones.
-	Uses a weighted random selection based on proj_mean to introduce variance.
+	Simulates a market by building N lineups with a uniqueness constraint.
+	- randomness: adds noise to projections to simulate different builder perspectives.
+	- min_uniques: ensures lineups aren't too similar.
 	"""
-	# Filter players with salary
-	players_df = players_df[players_df['salary'] > 0].copy()
+	if projections_df.empty: return projections_df
 	
-	for _ in range(50): # Try 50 times to find a unique lineup
-		selected = []
-		curr_salary = 0
-		
-		# Weighted random sampling
-		weights = players_df['proj_mean'] ** 2 # Prefer higher point totals
-		candidates = players_df.sample(n=roster_size*2, weights=weights, replace=False)
-		
-		for _, p in candidates.iterrows():
-			if len(selected) < roster_size and curr_salary + p['salary'] <= salary_cap:
-				selected.append(p['player_name'])
-				curr_salary += p['salary']
-		
-		if len(selected) == roster_size:
-			is_unique = True
-			for old in existing_lineups:
-				intersection = set(selected) & set(old)
-				if len(selected) - len(intersection) < min_uniques:
-					is_unique = False
-					break
-			if is_unique:
-				return selected
-	return None
-
-def project_ownership_simulated(projections_df, n_lineups=100, min_uniques=3):
-	"""
-	Simulates a builder creating n_lineups to see actual player frequency (ownership).
-	"""
+	pool = projections_df[projections_df['salary'] > 0].copy()
 	lineups = []
-	counts = {name: 0 for name in projections_df['player_name']}
+	player_counts = {name: 0 for name in pool['player_name']}
 	
 	for _ in range(n_lineups):
-		lu = build_lineup_with_uniques(projections_df, lineups, min_uniques=min_uniques)
-		if lu:
-			lineups.append(lu)
-			for p in lu: counts[p] += 1
+		# Create a 'skewed' projection set for this specific builder
+		# (proj * random factor between 1-randomness and 1+randomness)
+		temp_df = pool.copy()
+		temp_df['sim_score'] = temp_df['proj_mean'] * (1 + np.random.uniform(-randomness, randomness, len(temp_df)))
+		temp_df = temp_df.sort_values('sim_score', ascending=False)
+		
+		# Build a lineup with basic greedy logic but checking uniqueness
+		for _retry in range(10): # retry sample variations
+			current_lu = []
+			current_salary = 0
+			# Sample from top 12 instead of just pure greedy
+			for _, p in temp_df.head(12).sample(frac=1).iterrows():
+				if len(current_lu) < 6 and current_salary + p['salary'] <= 50000:
+					current_lu.append(p['player_name'])
+					current_salary += p['salary']
+			
+			if len(current_lu) == 6:
+				# Check uniqueness against all previous lineups
+				is_valid = True
+				for existing in lineups:
+					matches = len(set(current_lu) & set(existing))
+					if (6 - matches) < min_uniques:
+						is_valid = False
+						break
+				
+				if is_valid:
+					lineups.append(current_lu)
+					for p_name in current_lu:
+						player_counts[p_name] += 1
+					break
 	
-	# Ownership = 0f lineups player appears in
-	projections_df['proj_ownership'] = projections_df['player_name'].map(lambda x: round((counts[x]/max(1, len(lineups))) * 100, 2))
+	# Ownership is frequency in result pool
+	actual_n = len(lineups) if len(lineups) > 0 else 1
+	projections_df['proj_ownership'] = projections_df['player_name'].map(lambda x: round((player_counts[x] / actual_n) * 100, 1))
 	return projections_df

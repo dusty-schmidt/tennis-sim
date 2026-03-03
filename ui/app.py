@@ -43,4 +43,4 @@ elif action == 'Match Simulator':
 else:
 	st.subheader('Data Pipeline Monitor')
 	st.write('Database Location:', config.DATABASE_PATH)
-		from pipeline.processors.ownership import project_ownership_simulated; df = project_ownership(df); st.table(df[['player_name', 'salary', 'proj_mean', 'proj_ceil', 'p_win', 'proj_ownership']])
+		from pipeline.processors.ownership import simulate_market_ownership; df = project_ownership(df); st.table(df[['player_name', 'salary', 'proj_mean', 'proj_ceil', 'p_win', 'proj_ownership']])

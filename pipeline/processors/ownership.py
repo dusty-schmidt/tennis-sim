@@ -27,7 +27,7 @@ def simulate_uniques_ownership(projections_df, n_lineups=300, min_uniques=3):
 	while len(lineups) < n_lineups and attempt < max_attempts:
 		attempt += 1
 		# Sample a candidate lineup based on meta bias
-		candidate_indices = np.random.choice(pool.index, size=10, p=pool['meta_bias'], replace=False)
+		candidate_indices = np.random.choice(pool.index, size=min(10, len(pool.index)), p=pool['meta_bias'], replace=False)
 		candidate_df = pool.loc[candidate_indices]
 		
 		current_lu = []

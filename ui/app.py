@@ -14,7 +14,7 @@ st.title('🎾 Tennis Simulation Dashboard')
 db = DatabaseManager(config.DATABASE_PATH)
 
 st.sidebar.header('Controls')
-action = st.sidebar.selectbox('App Mode', ['Player Analytics', 'Match Simulator', 'Pipeline Status'])
+action = st.sidebar.selectbox('App Mode', ['Player Analytics', 'Match Simulator', 'Slate Optimizer', 'Pipeline Status'])
 
 players = [p[0] for p in db.conn.cursor().execute('SELECT DISTINCT player_name FROM player_profiles').fetchall()]
 
@@ -43,3 +43,4 @@ elif action == 'Match Simulator':
 else:
 	st.subheader('Data Pipeline Monitor')
 	st.write('Database Location:', config.DATABASE_PATH)
+\nelif action == 'Slate Optimizer':\n\tst.subheader('SaberSim-Style Slate Optimizer')\n\tst.write('This mode runs 10k simulations per match to find ceilings and optimal lineups.')\n\tif st.button('Generate Projections'):\n\t\tfrom pipeline.processors.projector import project_dummy_slate\n\t\tmatchups = [('Jannik Sinner', 'Daniil Medvedev'), ('Carlos Alcaraz', 'Alexander Zverev')]\n\t\tsalaries = {'Jannik Sinner': 10000, 'Daniil Medvedev': 7600, 'Carlos Alcaraz': 9800, 'Alexander Zverev': 7800}\n\t\tdf = project_dummy_slate(matchups, surface='hard', salaries=salaries, n_sims=1000)\n\t\tst.table(df[['player_name', 'salary', 'proj_mean', 'proj_ceil', 'p_win']])\n
